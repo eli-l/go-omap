@@ -277,4 +277,36 @@ func TestOrderedMap_Sort(t *testing.T) {
 		}
 
 	})
+
+	t.Run("sort returns unindexed positions", func(t *testing.T) {
+		m := NewOrderedMap[string, int]()
+		m.Set("a", 1)
+		m.Set("b", 2)
+		m.Set("c", 3)
+
+		m.Sort(func(kvMap map[string]int) ([]string, map[string]int) {
+			return []string{"c", "a", "b"}, nil
+		})
+
+		m.Delete("a")
+	})
+
+	t.Run("reindex", func(t *testing.T) {
+		m := NewOrderedMap[string, int]()
+		m.Set("a", 1)
+		m.Set("b", 2)
+		m.Set("c", 3)
+
+		m.Sort(func(kvMap map[string]int) ([]string, map[string]int) {
+			return []string{"c", "a", "b"}, nil
+		})
+
+		if m.keyPos != nil {
+			t.Errorf("Expected keyPos map to be nil")
+		}
+		m.Reindex()
+		if m.keyPos == nil {
+			t.Errorf("Expected keyPos map to be initialized")
+		}
+	})
 }

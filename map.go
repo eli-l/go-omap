@@ -87,8 +87,44 @@ func (m *OrderedMap[K, T]) Iterator(yield func(key K, value T) bool) {
 // Delete removes a key-value pair from the map
 func (m *OrderedMap[K, T]) Delete(key K) {
 	delete(m.kvMap, key)
-	m.keys = append(m.keys[:m.keyPos[key]], m.keys[m.keyPos[key]+1:]...)
-	delete(m.keyPos, key)
+
+	nilKeyPos := m.keyPos == nil // if keyPos map is nil, we need to recreate it
+
+	_, ok := m.keyPos[key] // check if the key exists
+	if ok {
+		m.keys = append(m.keys[:m.keyPos[key]], m.keys[m.keyPos[key]+1:]...)
+		delete(m.keyPos, key)
+	} else { // iterate over the keys to find the key (slow)
+
+		if nilKeyPos {
+			m.keyPos = make(map[K]int) // initialize the map
+		}
+
+		// since we iterate over all keys we can recreate the keyPos map
+		for i, k := range m.keys {
+			if k == key {
+				m.keys = append(m.keys[:i], m.keys[i+1:]...)
+			} else {
+				if nilKeyPos {
+					m.keyPos[k] = i
+				}
+			}
+		}
+	}
+}
+
+func (m *OrderedMap[K, T]) Reindex() {
+	m.indexKeys()
+}
+
+// indexKeys rebuilds the keyPos map
+func (m *OrderedMap[K, T]) indexKeys() {
+	if m.keyPos == nil {
+		m.keyPos = make(map[K]int)
+	}
+	for i, k := range m.keys {
+		m.keyPos[k] = i
+	}
 }
 
 // Len returns the number of elements in the map
