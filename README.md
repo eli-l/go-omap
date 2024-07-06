@@ -1,5 +1,7 @@
 # Ordered Map for Go (Golang)
 
+[![codecov](https://codecov.io/gh/eli-l/go-omap/graph/badge.svg?token=JRRGRQYADI)](https://codecov.io/gh/eli-l/go-omap)
+
 This library uses an experimental feature for iterators.
 
 You need to enable `GOEXPERIMENT=rangefunc` in order to build it.
