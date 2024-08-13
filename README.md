@@ -4,7 +4,9 @@
 
 This library uses an experimental feature for iterators.
 
-You need to enable `GOEXPERIMENT=rangefunc` in order to build it.
+## Iterator functions:
+This library depends on iterator function. In Go v1.23 range-over-func a part of the language. 
+For Go v1.22 you need to enable `GOEXPERIMENT=rangefunc` in order to build it.
 
 ## Ordered map
 Provides a way to use Key-Value pais within a map (strictly typed with generic functions).
