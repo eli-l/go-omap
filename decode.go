@@ -11,7 +11,7 @@ import (
 	The JSON object is expected to be a map of key-value pairs
 	This implementation preserves original orders of the keys.
 */
-func (m *OrderedMap[K, T]) Decode(r io.Reader) error {
+func (m *OrderedMap[string, any]) Decode(r io.Reader) error {
 	dec := json.NewDecoder(r)
 
 	t, err := dec.Token()
@@ -23,6 +23,14 @@ func (m *OrderedMap[K, T]) Decode(r io.Reader) error {
 		return fmt.Errorf("expected '{' but got %v", t)
 	}
 
+	if err := decodeObject(dec, m); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decodeObject[K comparable, T any](dec *json.Decoder, m *OrderedMap[K, T]) error {
 	for dec.More() {
 		t, err := dec.Token()
 		if err != nil {
@@ -34,14 +42,15 @@ func (m *OrderedMap[K, T]) Decode(r io.Reader) error {
 		}
 
 		value, err := decodeValue(dec)
-
+		if err != nil {
+			return err
+		}
 		val, ok := value.(T)
 		if !ok {
 			return fmt.Errorf("value type mismatch: %v", value)
 		}
 		m.Set(key, val)
 	}
-
 	if _, err := dec.Token(); err != nil {
 		return err
 	}
@@ -66,34 +75,6 @@ func decodeArray(dec *json.Decoder) (any, error) {
 	return arr, nil
 }
 
-func decodeObject(dec *json.Decoder) (any, error) {
-	m := NewOrderedMap[string, any]()
-
-	for dec.More() {
-		t, err := dec.Token()
-		if err != nil {
-			return nil, err
-		}
-
-		key, ok := t.(string)
-		if !ok {
-			return nil, fmt.Errorf("expected string but got %v", t)
-		}
-
-		value, err := decodeValue(dec)
-		if err != nil {
-			return nil, err
-		}
-
-		m.Set(key, value)
-	}
-	if _, err := dec.Token(); err != nil {
-		return nil, err
-	}
-
-	return m, nil
-}
-
 func decodeValue(dec *json.Decoder) (any, error) {
 	t, err := dec.Token()
 	if err != nil {
@@ -104,13 +85,14 @@ func decodeValue(dec *json.Decoder) (any, error) {
 	case json.Delim:
 		switch v {
 		case '{':
-			return decodeObject(dec)
+			subMap := NewOrderedMap[string, any]()
+			if err := decodeObject(dec, subMap); err != nil {
+				return nil, err
+			}
+			return subMap, nil
 		case '[':
 			return decodeArray(dec)
-		default:
-			return nil, fmt.Errorf("unexpected delimiter %v", v)
 		}
-	default:
-		return t, nil
 	}
+	return t, nil
 }

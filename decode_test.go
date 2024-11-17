@@ -63,5 +63,106 @@ func TestOrderedMap_DecodeJSON(t *testing.T) {
 			}
 		}
 	})
+}
 
+func TestOrderedMap_DecodeJSONError(t *testing.T) {
+	t.Run("invalid JSON", func(t *testing.T) {
+		data := `a{"a": 1}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("missing closing bracket", func(t *testing.T) {
+		data := `{"a": 1`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("start", func(t *testing.T) {
+		data := `[a]{"a": 1}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("delimiter", func(t *testing.T) {
+		data := `{"a"; 1}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("key", func(t *testing.T) {
+		data := `{a; 1}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("embedded object", func(t *testing.T) {
+		data := `{"a": 1, "obj": {"b"":2}}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("malformed array", func(t *testing.T) {
+		data := `{"a": 1, "ar": ["1"\]}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("missing array closing bracket", func(t *testing.T) {
+		data := `{"a": 1, "ar": ["1"}`
+		dataMap := NewOrderedMap[string, any]()
+
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+}
+
+func TestOrderedMap_Types(t *testing.T) {
+	t.Run("mismatch key type", func(t *testing.T) {
+		data := `{"a": 1}`
+		dataMap := NewOrderedMap[int, any]()
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
+
+	t.Run("mismatch data type", func(t *testing.T) {
+		data := `{"a": 1}`
+		dataMap := NewOrderedMap[string, string]()
+		err := dataMap.Decode(strings.NewReader(data))
+		if err == nil {
+			t.Error("Expected error, got nil")
+		}
+	})
 }
