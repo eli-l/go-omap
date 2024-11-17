@@ -2,8 +2,6 @@
 
 [![codecov](https://codecov.io/gh/eli-l/go-omap/graph/badge.svg?token=JRRGRQYADI)](https://codecov.io/gh/eli-l/go-omap)
 
-This library uses an experimental feature for iterators.
-
 ## Iterator functions:
 This library depends on iterator function. In Go v1.23 range-over-func a part of the language. 
 For Go v1.22 you need to enable `GOEXPERIMENT=rangefunc` in order to build it.
