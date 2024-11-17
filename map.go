@@ -22,6 +22,10 @@
 
 package omap
 
+import (
+	"errors"
+)
+
 // OrderedMap is a map that maintains the specific order of elements
 // Allows to address elements by key (any comparable) at the same time
 // provides deterministic iteration order.
@@ -40,6 +44,17 @@ func NewOrderedMap[K comparable, T any]() *OrderedMap[K, T] {
 		keys:   make([]K, 0),
 		keyPos: make(map[K]int),
 	}
+}
+
+func (m *OrderedMap[K, T]) Init() error {
+	if m.kvMap != nil {
+		return errors.New("map already initialized")
+	}
+
+	m.kvMap = make(map[K]T)
+	m.keys = make([]K, 0)
+	m.keyPos = make(map[K]int)
+	return nil
 }
 
 // Set adds a new key-value pair to the map

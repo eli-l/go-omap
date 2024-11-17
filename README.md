@@ -72,3 +72,25 @@ m.Sort(sortFunc func(map[K]T) ([]K, map[K]int))
 m.Sortk(sortFunc func(keys []K) ([]K, map[K]int))
 
 ```
+
+### Decode JSON
+This library provides a way to decode ordered map from an arbitrary JSON.
+It preserves the order of original keys.
+Accepts plain values, embedded JSON objects and arrays.
+
+- Embedded object are decoded as OrderedMap[string, any] as well.
+- Embedded Arrays are decoded as []any.
+
+```go
+data := `{"a": 1, "b": 2, "c": 3, "z": 4,
+		"embedded": { "g": 5, "h": 6, "i": 7 }, 
+		"arr": [8,9,10]}`
+
+// it must be a map of [string, any], like regular map for parsing JSON
+dataMap := NewOrderedMap[string, any]()
+
+err := dataMap.Decode(strings.NewReader(data))
+```
+
+See [tests](./decode_test.go) for more examples.
+
